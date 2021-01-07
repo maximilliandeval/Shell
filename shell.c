@@ -1,26 +1,8 @@
-/*****
-* Project 04: Shell
-* COSC 208, Introduction to Computer Systems, Fall 2020
-*****/
-
-// valgrind --track-origins=yes --leak-check=full ./shell
-
-// Run on Mac:
-// #include <stdio.h>
-// #include <stdlib.h>
-// #include <string.h>
-// #include <unistd.h>
-// #include <signal.h>
-
-// Run on Colgate servers:
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <signal.h>
-#include <sys/types.h>
-#include <sys/wait.h>
-
 
 #define PROMPT "shell> "
 #define MAX_BACKGROUND 50
