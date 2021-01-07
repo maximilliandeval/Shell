@@ -14,6 +14,5 @@ Every time the shell receives a new command, it scans the list of background pro
 
 
 
-To compile the shell, run: `make`
-
-To start the shell, run: `./shell`
+To compile the shell, run: `make`.
+To start the shell, run: `./shell`.
