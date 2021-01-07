@@ -14,17 +14,12 @@ void handleKill(char **command, pid_t backArray[], int *backLen, char **cmdPtrs[
 void foregroundProcess(char **command);
 void backgroundProcess(char **command, pid_t backArray[], int *backLen, char **cmdPtrs[], int *cmdPtrsLen);
 
-/*
- * Break input string into an array of strings.
- * @param input the string to tokenize
- * @param delimiters the characters that delimite tokens
- * @return the array of strings with the last element of the array set to NULL
- */
+// Break input string into an array of strings.
+// The last element of the array is set to NULL
 char** tokenize(const char *input, const char *delimiters) {
     char *token = NULL;
 
-    // make a copy of the input string, because strtok
-    // likes to mangle strings.  
+    // make a copy of the input string, because strtok likes to mangle strings.  
     char *input_copy = strdup(input);
 
     // find out exactly how many tokens we have
@@ -50,10 +45,7 @@ char** tokenize(const char *input, const char *delimiters) {
     return array;
 }
 
-/*
- * Free all memory used to store an array of tokens.
- * @param tokens the array of tokens to free
- */
+// Free all memory used to store an array of tokens.
 void free_tokens(char **tokens) {
     int i = 0;
     while (tokens[i] != NULL) {
@@ -66,7 +58,6 @@ void free_tokens(char **tokens) {
 
 
 int main(int argc, char **argv) {
-    // main loop for the shell
     printf("%s", PROMPT);
     fflush(stdout);  // Display the prompt immediately
     char buffer[1024];
@@ -82,10 +73,9 @@ int main(int argc, char **argv) {
     int commandPointersLength = 0;
     int *cmdPtrsLen = &commandPointersLength;
 
+    
     while (fgets(buffer, 1024, stdin) != NULL) {
         char **command = tokenize(buffer, " \t\n");
-
-        // Scan the array of background processes and properly dispose of any processes that completed
         scanBackground(backArray, backLen, cmdPtrs, cmdPtrsLen);
 
         // RUN THE COMMAND:
@@ -149,8 +139,6 @@ void scanBackground(pid_t backArray[], int *backLen, char **cmdPtrs[], int *cmdP
             // If so, add the child process PID to array of finished processes
             completedPids[numCompleted] = backArray[i];
             numCompleted++;
-        } else if (childExitStatus == -1) {
-            // Error with waitpid() occured
         }
     }
     // Remove the finished PIDs from the array of active background processes
@@ -181,7 +169,7 @@ void scanBackground(pid_t backArray[], int *backLen, char **cmdPtrs[], int *cmdP
     }
 }
 
-// Handle the built-in exit command
+// Handle the built-in exit command (quit the shell)
 void handleExit(char **command, pid_t backArray[], int *backLen, char **cmdPtrs[], int *cmdPtrsLen) {
     // Check that the correct syntax has been used
     if (command[1] != NULL) {
@@ -201,7 +189,7 @@ void handleExit(char **command, pid_t backArray[], int *backLen, char **cmdPtrs[
     exit(EXIT_SUCCESS);
 }
 
-// Handle the built-in jobs command
+// Handle the built-in jobs command (print list of running background processes)
 void handleJobs(char **command, pid_t backArray[], int *backLen) {
     // Check that the correct syntax has been used
     if (command[1] != NULL) {
@@ -221,7 +209,7 @@ void handleJobs(char **command, pid_t backArray[], int *backLen) {
     free_tokens(command);
 }
 
-// Handle the built-in kill PID command
+// Handle the built-in kill <PID> command (kill specified process)
 void handleKill(char **command, pid_t backArray[], int *backLen, char **cmdPtrs[], int *cmdPtrsLen) {
     // Check that correct syntax has been used
     if (command[1] == NULL) {
@@ -283,7 +271,7 @@ void handleKill(char **command, pid_t backArray[], int *backLen, char **cmdPtrs[
                     }
                 }
                 *backLen = *backLen - 1;
-                // Free the target process' command tokens
+                // Free the target process's command tokens
                 int ptrSeen = -1;
                 for (int i = 0; i < *cmdPtrsLen; i++) {
                     if (i == seen) {
@@ -306,10 +294,8 @@ void handleKill(char **command, pid_t backArray[], int *backLen, char **cmdPtrs[
     free_tokens(command);
 }
 
-// Handle non-built-on kill commands that occur in the foreground (no &)
+// Handle non-built-in commands that occur in the foreground by invoking specified executable program
 void foregroundProcess(char **command) {
-    // Fork() returns 0 to the child process and returns the process ID of the child process
-    // to the parent process
     pid_t pid = fork();
     // Child is running
     if (pid == 0) {
@@ -320,9 +306,6 @@ void foregroundProcess(char **command) {
         }
     // Parent is running
     } else {
-        // If successful, waitpid returns the process ID of the terminated process 
-        // whose status was reported. If unsuccessful, a -1 is returned.
-        // statusPtr gets the return value of the process (the result from execv())
         pid_t childExitStatus = waitpid(pid, NULL, 0);
         if (childExitStatus == -1) {
             printf("Invoking the specified executable failed\n");
@@ -333,8 +316,6 @@ void foregroundProcess(char **command) {
 
 // Handle non-built-in commands that occur in the background (indicated with &)
 void backgroundProcess(char **command, pid_t backArray[], int *backLen, char **cmdPtrs[], int *cmdPtrsLen) {
-    // Fork() returns 0 to the child process and returns the process ID of the child process
-    // to the parent process
     pid_t pid = fork();
     // Child is running
     if (pid == 0) {
@@ -346,7 +327,6 @@ void backgroundProcess(char **command, pid_t backArray[], int *backLen, char **c
             }
             currentIdx++;
         }
-        // Invoke the command
         int programExitStatus = execv(command[0], command);
         // If the executable failed for some reason, clean up the process:
         programExitStatus = -1;
@@ -382,8 +362,6 @@ void backgroundProcess(char **command, pid_t backArray[], int *backLen, char **c
             }
         }
         *cmdPtrsLen = *cmdPtrsLen - 1;
-        // End the child process
-        //kill(getpid(), SIGKILL);
         exit(1);
 
     // Parent is running
