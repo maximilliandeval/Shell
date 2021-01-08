@@ -19,10 +19,10 @@ void backgroundProcess(char **command, pid_t backArray[], int *backLen, char **c
 char** tokenize(const char *input, const char *delimiters) {
     char *token = NULL;
 
-    // Make a copy of the input string, because strtok likes to mangle strings.  
+    // Make a copy of the input string, because strtok likes to mangle strings 
     char *input_copy = strdup(input);
 
-    // Find out exactly how many tokens we have
+    // Find out exactly how many tokens ther are
     int count = 0;
     for (token = strtok(input_copy, delimiters); token; 
             token = strtok(NULL, delimiters)) {
@@ -45,14 +45,14 @@ char** tokenize(const char *input, const char *delimiters) {
     return array;
 }
 
-// Free all memory used to store an array of tokens.
+// Free all memory used to store an array of tokens
 void free_tokens(char **tokens) {
     int i = 0;
     while (tokens[i] != NULL) {
-        free(tokens[i]); // free each string
+        free(tokens[i]); // Free each string
         i++;
     }
-    free(tokens); // then free the array
+    free(tokens); // Then free the array
 }
 
 
